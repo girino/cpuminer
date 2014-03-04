@@ -5,6 +5,7 @@
 #include "sph_shavite.h"
 #include "sph_metis.h"
 #include "metiscoinminerC.h"
+#include <stdio.h>
 
 //#define STEP_SIZE 0x10000
 //#define NUM_STEPS 0x1000
