@@ -46,6 +46,11 @@ int scanhash_metis(int thr_id, uint32_t *pdata,
 	int ret;
 
 	ret = scanhash_metis_opencl(thr_id, pdata, ptarget, max_nonce, hashes_done);
+	if (ret) {
+		// validates
+		printf("validating share...\n");
+		return scanhash_metis2(thr_id, pdata, ptarget, pdata[19], hashes_done);
+	}
 
 	return ret;
 
@@ -84,7 +89,7 @@ int scanhash_metis2(int thr_id, uint32_t *pdata,
 		sph_metis512(&mctx, hash1, 64);
 		sph_metis512_close(&mctx, hash2);
 
-	    if( *(uint32_t*)((uint8_t*)hash2 + 28) <= Htarg )
+	    if( *(uint32_t*)((uint8_t*)hash2 + 28) <= Htarg && fulltest(hash2, ptarget) )
 	    {
 			*hashes_done = n - pdata[19] + 1;
 			pdata[19] = data[19];
