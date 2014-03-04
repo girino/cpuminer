@@ -392,7 +392,7 @@ void scrypt_core_3way(uint32_t *X, uint32_t *V);
 void scrypt_core_6way(uint32_t *X, uint32_t *V);
 #endif
 
-#elif defined(__i386__)
+#elif 0 //defined(__i386__)
 
 #define SCRYPT_MAX_WAYS 4
 #define scrypt_best_throughput() 1
