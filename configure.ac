@@ -15,6 +15,7 @@ AC_PROG_GCC_TRADITIONAL
 AM_PROG_CC_C_O
 AM_PROG_AS
 AC_PROG_RANLIB
+AC_PROG_CXX
 
 dnl Checks for header files
 AC_HEADER_STDC
@@ -61,33 +62,32 @@ case $target in
     ;;
 esac
 
-if test x$have_x86 = xtrue -o x$have_x86_64 = xtrue
-then
-  AC_MSG_CHECKING(whether we can compile AVX code)
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,[asm ("vmovdqa %ymm0, %ymm1");])],
-    AC_DEFINE(USE_AVX, 1, [Define to 1 if AVX assembly is available.])
-    AC_MSG_RESULT(yes)
-    AC_MSG_CHECKING(whether we can compile XOP code)
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,[asm ("vprotd \$7, %xmm0, %xmm1");])],
-      AC_DEFINE(USE_XOP, 1, [Define to 1 if XOP assembly is available.])
-      AC_MSG_RESULT(yes)
-    ,
-      AC_MSG_RESULT(no)
-      AC_MSG_WARN([The assembler does not support the XOP instruction set.])
-    )
-    AC_MSG_CHECKING(whether we can compile AVX2 code)
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,[asm ("vpaddd %ymm0, %ymm1, %ymm2");])],
-      AC_DEFINE(USE_AVX2, 1, [Define to 1 if AVX2 assembly is available.])
-      AC_MSG_RESULT(yes)
-    ,
-      AC_MSG_RESULT(no)
-      AC_MSG_WARN([The assembler does not support the AVX2 instruction set.])
-    )
-  ,
-    AC_MSG_RESULT(no)
-    AC_MSG_WARN([The assembler does not support the AVX instruction set.])
-  )
+dnl Figure out where OpenCL is, either passed or system-wide
+AC_ARG_WITH([opencl-framework],
+	[AC_HELP_STRING([--with-opencl-framework],[use OpenCL framework (OSX)])],
+	[with_opencl_framework="yes"],
+	[with_opencl_framework="no"])
+if test "x$with_opencl_framework" = xno; then
+	AC_CHECK_LIB([OpenCL], [OpenCL], [OPENCL_LIBS="-lOpenCL"], AC_MSG_ERROR([OpenCL library could not be found]))
+else
+	OPENCL_LIBS="-framework OpenCL"
 fi
+OPENCL_INCLUDES=""
+AC_ARG_WITH([opencl-inc],
+	[AC_HELP_STRING([--with-opencl-inc],[specify OpenCL include paths])],
+	[with_opencl_inc=$withval],
+	[with_opencl_inc="auto"])
+if test "x$with_opencl_inc" = xauto; then
+	AC_CHECK_HEADERS(CL/cl.h, [found="yes"])
+	AC_CHECK_HEADERS(OpenCL/opencl.h, [found="yes"])
+	if test "x$found" = x; then
+		AC_MSG_ERROR([OpenCL headers could not be found])
+	fi
+else
+	OPENCL_INCLUDES="-I$with_opencl_inc"
+fi
+
+
 
 AC_CHECK_LIB(jansson, json_loads, request_jansson=false, request_jansson=true)
 AC_CHECK_LIB([pthread], [pthread_create], PTHREAD_LIBS="-lpthread",
@@ -112,6 +112,8 @@ fi
 LIBCURL_CHECK_CONFIG(, 7.15.2, ,
   [AC_MSG_ERROR([Missing required libcurl >= 7.15.2])])
 
+AC_SUBST(OPENCL_LIBS)
+AC_SUBST(OPENCL_INCLUDES)
 AC_SUBST(JANSSON_LIBS)
 AC_SUBST(PTHREAD_FLAGS)
 AC_SUBST(PTHREAD_LIBS)
