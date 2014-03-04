@@ -53,7 +53,7 @@ int scanhash_metis(int thr_id, uint32_t *pdata,
 
 	ret = scanhash_metis_opencl(thr_id, pdata,	target, max_nonce, hashes_done);
 
-	for (i = 0; i < 20; i++)
+	for (i = 0; i < 19; i++)
 		pdata[i] = le32dec(pdata + i);
 
 	return ret;
