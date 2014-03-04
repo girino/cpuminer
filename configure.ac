@@ -68,7 +68,7 @@ AC_ARG_WITH([opencl-framework],
 	[with_opencl_framework="yes"],
 	[with_opencl_framework="no"])
 if test "x$with_opencl_framework" = xno; then
-	AC_CHECK_LIB([OpenCL], [OpenCL], [OPENCL_LIBS="-lOpenCL"], AC_MSG_ERROR([OpenCL library could not be found]))
+	AC_CHECK_LIB([OpenCL], [clGetPlatformIDs], [OPENCL_LIBS="-lOpenCL"], AC_MSG_ERROR([OpenCL library could not be found]))
 else
 	OPENCL_LIBS="-framework OpenCL"
 fi
