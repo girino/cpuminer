@@ -38,14 +38,14 @@
 #include <string.h>
 #include <inttypes.h>
 
-int scanhash_metis(int thr_id, uint32_t *pdata,
+int scanhash_metis(int device, enum sha256_algos algo, int thr_id, uint32_t *pdata,
 	const uint32_t *ptarget,
 	uint32_t max_nonce, unsigned long *hashes_done) {
 
 	int i;
 	int ret;
 
-	ret = scanhash_metis_opencl(thr_id, pdata, ptarget, max_nonce, hashes_done);
+	ret = scanhash_metis_opencl(device, algo, thr_id, pdata, ptarget, max_nonce, hashes_done);
 	if (ret) {
 		// validates
 		printf("validating share...\n");

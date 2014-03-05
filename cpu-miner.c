@@ -100,16 +100,13 @@ struct workio_cmd {
 	} u;
 };
 
-enum sha256_algos {
-	ALGO_SCRYPT,		/* scrypt(1024,1,1) */
-	ALGO_SHA256D,		/* SHA-256d */
-	ALGO_METIS,			/* metis */
-};
-
 static const char *algo_names[] = {
 	[ALGO_SCRYPT]		= "scrypt",
 	[ALGO_SHA256D]		= "sha256d",
-	[ALGO_METIS]		= "metis",
+	[ALGO_METIS_CPU]		= "metiscpu",
+	[ALGO_METIS_GPU_1]		= "metis1",
+	[ALGO_METIS_GPU_2]		= "metis2",
+	[ALGO_METIS_GPU_3]		= "metis3",
 };
 
 bool opt_debug = false;
@@ -129,7 +126,8 @@ int opt_timeout = 270;
 static int opt_scantime = 5;
 static json_t *opt_config;
 static const bool opt_time = true;
-static enum sha256_algos opt_algo = ALGO_METIS;
+static enum sha256_algos opt_algo = ALGO_METIS_GPU_3;
+static int device = 0;
 static int opt_n_threads;
 static int num_processors;
 static char *rpc_url;
@@ -169,6 +167,11 @@ Options:\n\
   -a, --algo=ALGO       specify the algorithm to use\n\
                           scrypt    scrypt(1024, 1, 1) (default)\n\
                           sha256d   SHA-256d\n\
+                          metis1    metiscoin (algo 1)\n\
+                          metis2    metiscoin (algo 1)\n\
+                          metis3    metiscoin (algo 3 - default)\n\
+  -d, --device=N        number of OpenCL device\n\
+      --list-devices    list all available OpenCL devices\n\
   -o, --url=URL         URL of mining server\n\
   -O, --userpass=U:P    username:password pair for mining server\n\
   -u, --user=USERNAME   username for mining server\n\
@@ -209,7 +212,7 @@ static char const short_options[] =
 #ifdef HAVE_SYSLOG_H
 	"S"
 #endif
-	"a:c:Dhp:Px:qr:R:s:t:T:o:u:O:V";
+	"a:c:Dhp:Px:qr:R:s:t:T:o:u:O:Vd:";
 
 static struct option const options[] = {
 	{ "algo", 1, NULL, 'a' },
@@ -239,6 +242,8 @@ static struct option const options[] = {
 	{ "user", 1, NULL, 'u' },
 	{ "userpass", 1, NULL, 'O' },
 	{ "version", 0, NULL, 'V' },
+	{ "device", 1, NULL, 'd' },
+	{ "list-devices", 0, NULL, 1010 },
 	{ 0, 0, 0, 0 }
 };
 
@@ -656,7 +661,7 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		free(xnonce2str);
 	}
 
-	if (opt_algo == ALGO_SCRYPT || opt_algo == ALGO_METIS)
+	if (opt_algo == ALGO_SCRYPT)
 		diff_to_target(work->target, sctx->job.diff / 65536.0);
 	else
 		diff_to_target(work->target, sctx->job.diff);
@@ -745,7 +750,8 @@ static void *miner_thread(void *userdata)
 			switch (opt_algo) {
 			case ALGO_SCRYPT: max64 = 0xfffLL; break;
 			case ALGO_SHA256D: max64 = 0x1fffffLL; break;
-			case ALGO_METIS: max64 = 0xfffLL; break;
+			case ALGO_METIS_CPU: max64 = 0xfffLL; break;
+			default: max64 = 0x80000LL; break; // for GPU algos
 			}
 		}
 		if (work.data[19] + max64 > end_nonce)
@@ -768,8 +774,10 @@ static void *miner_thread(void *userdata)
 			                      max_nonce, &hashes_done);
 			break;
 
-		case ALGO_METIS:
-			rc = scanhash_metis(thr_id, work.data, work.target,
+		case ALGO_METIS_GPU_1:
+		case ALGO_METIS_GPU_2:
+		case ALGO_METIS_GPU_3:
+			rc = scanhash_metis(device, opt_algo,thr_id, work.data, work.target,
 			                      max_nonce, &hashes_done);
 			break;
 
@@ -1013,6 +1021,12 @@ static void show_version_and_exit(void)
 	exit(0);
 }
 
+static void list_devices_and_exit(void)
+{
+	list_devices();
+	exit(0);
+}
+
 static void show_usage_and_exit(int status)
 {
 	if (status)
@@ -1062,6 +1076,9 @@ static void parse_arg (int key, char *arg)
 		break;
 	case 'D':
 		opt_debug = true;
+		break;
+	case 'd':
+		device = atoi(arg);
 		break;
 	case 'p':
 		free(rpc_pass);
@@ -1192,6 +1209,8 @@ static void parse_arg (int key, char *arg)
 		show_version_and_exit();
 	case 'h':
 		show_usage_and_exit(0);
+	case 1010:
+		list_devices_and_exit();
 	default:
 		show_usage_and_exit(1);
 	}

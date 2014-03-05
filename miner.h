@@ -248,4 +248,15 @@ extern void *tq_pop(struct thread_q *tq, const struct timespec *abstime);
 extern void tq_freeze(struct thread_q *tq);
 extern void tq_thaw(struct thread_q *tq);
 
+// brought here for compat
+enum sha256_algos {
+	ALGO_SCRYPT,		/* scrypt(1024,1,1) */
+	ALGO_SHA256D,		/* SHA-256d */
+	ALGO_METIS_CPU,			/* metis */
+	ALGO_METIS_GPU_1,			/* metis */
+	ALGO_METIS_GPU_2,			/* metis */
+	ALGO_METIS_GPU_3,			/* metis */
+};
+
+
 #endif /* __MINER_H__ */

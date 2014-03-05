@@ -7,9 +7,7 @@
 #include "metiscoinminerC.h"
 #include <stdio.h>
 
-//#define STEP_SIZE 0x10000
-//#define NUM_STEPS 0x1000
-//#define STEP_MULTIPLIER 0x10000
+#define DEFAULT_STEP_SIZE 0x80000
 
 int log2(size_t value) {
 	int ret = 0;
@@ -378,16 +376,26 @@ int MetiscoinOpenCLSingle::metiscoin_process(int thr_id, uint32_t *pdata,
 }
 
 extern "C" {
-MetiscoinOpenCL* processor = NULL;
-void init_opencl_miner() {
-	processor = new MetiscoinOpenCLSingle(0, 1<<19);
+
+void list_devices() {
+	OpenCLMain::getInstance().listDevices();
 }
-int scanhash_metis_opencl(int thr_id, uint32_t *pdata,
+
+MetiscoinOpenCL* processor = NULL;
+void init_opencl_miner(int device, enum sha256_algos algo) {
+	switch(algo) {
+	case ALGO_METIS_GPU_1: processor = new MetiscoinOpenCLConstant(device, DEFAULT_STEP_SIZE); break;
+	case ALGO_METIS_GPU_2: processor = new MetiscoinOpenCLGlobal(device, DEFAULT_STEP_SIZE); break;
+	case ALGO_METIS_GPU_3: processor = new MetiscoinOpenCLSingle(device, DEFAULT_STEP_SIZE); break;
+
+	}
+}
+int scanhash_metis_opencl(int device, enum sha256_algos algo, int thr_id, uint32_t *pdata,
 	const uint32_t *ptarget,
 	uint32_t max_nonce, unsigned long *hashes_done) {
 
 	if (processor == NULL) {
-		init_opencl_miner();
+		init_opencl_miner(device, algo);
 	}
 
 	return processor->metiscoin_process(thr_id, pdata,	ptarget, max_nonce, hashes_done);
