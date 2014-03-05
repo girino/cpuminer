@@ -49,7 +49,7 @@ int scanhash_metis(int thr_id, uint32_t *pdata,
 	if (ret) {
 		// validates
 		printf("validating share...\n");
-		return scanhash_metis2(thr_id, pdata, ptarget, pdata[19], hashes_done);
+		return validate(pdata, ptarget);
 	}
 
 	return ret;
@@ -57,14 +57,10 @@ int scanhash_metis(int thr_id, uint32_t *pdata,
 }
 
 
-int scanhash_metis2(int thr_id, uint32_t *pdata,
-	const uint32_t *ptarget,
-	uint32_t max_nonce, unsigned long *hashes_done)
+int validate(const uint32_t *pdata,
+	const uint32_t *ptarget)
 {
-	uint32_t n = pdata[19] - 1;
 	const uint32_t Htarg = ptarget[7];
-	int i;
-	uint32_t data[20];
 	uint64_t hash0[8];
 	uint64_t hash1[8];
 	uint64_t hash2[8];
@@ -72,33 +68,23 @@ int scanhash_metis2(int thr_id, uint32_t *pdata,
 	sph_keccak224_context kctx;
 	sph_shavite512_context sctx;
 	sph_metis512_context mctx;
-	memcpy(data, pdata, 80);
 
-	do {
-		data[19] = ++n;
+	sph_keccak512_init(&kctx);
+	sph_keccak512(&kctx, pdata, 80);
+	sph_keccak512_close(&kctx, hash0);
 
-		sph_keccak512_init(&kctx);
-		sph_keccak512(&kctx, data, 80);
-		sph_keccak512_close(&kctx, hash0);
+	sph_shavite512_init(&sctx);
+	sph_shavite512(&sctx, hash0, 64);
+	sph_shavite512_close(&sctx, hash1);
 
-		sph_shavite512_init(&sctx);
-		sph_shavite512(&sctx, hash0, 64);
-		sph_shavite512_close(&sctx, hash1);
+	sph_metis512_init(&mctx);
+	sph_metis512(&mctx, hash1, 64);
+	sph_metis512_close(&mctx, hash2);
 
-		sph_metis512_init(&mctx);
-		sph_metis512(&mctx, hash1, 64);
-		sph_metis512_close(&mctx, hash2);
+	if( *(uint32_t*)((uint8_t*)hash2 + 28) <= Htarg && fulltest(hash2, ptarget) )
+	{
+		return 1;
+	}
 
-	    if( *(uint32_t*)((uint8_t*)hash2 + 28) <= Htarg && fulltest(hash2, ptarget) )
-	    {
-			*hashes_done = n - pdata[19] + 1;
-			pdata[19] = data[19];
-			return 1;
-	    }
-
-	} while (n < max_nonce && !work_restart[thr_id].restart);
-
-	*hashes_done = n - pdata[19] + 1;
-	pdata[19] = n;
 	return 0;
 }

@@ -39,7 +39,7 @@
 #include "miner.h"
 
 #define PROGRAM_NAME		"minerd"
-#define LP_SCANTIME		60
+#define LP_SCANTIME		30
 
 #ifdef __linux /* Linux specific policy and affinity management */
 #include <sched.h>
@@ -741,8 +741,13 @@ static void *miner_thread(void *userdata)
 			max64 = g_work_time + (have_longpoll ? LP_SCANTIME : opt_scantime)
 			      - time(NULL);
 		max64 *= thr_hashrates[thr_id];
-		if (max64 <= 0)
-			max64 = opt_algo != ALGO_SHA256D ? 0xfffLL : 0x1fffffLL;
+		if (max64 <= 0) {
+			switch (opt_algo) {
+			case ALGO_SCRYPT: max64 = 0xfffLL; break;
+			case ALGO_SHA256D: max64 = 0x1fffffLL; break;
+			case ALGO_METIS: max64 = 0xfffLL; break;
+			}
+		}
 		if (work.data[19] + max64 > end_nonce)
 			max_nonce = end_nonce;
 		else
