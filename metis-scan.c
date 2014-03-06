@@ -44,12 +44,16 @@ int scanhash_metis(int device, enum sha256_algos algo, int thr_id, uint32_t *pda
 
 	int i;
 	int ret;
+	uint32_t data[20];
+	for (i = 0; i < 20; i++) {
+		data[i] = swab32(pdata[i]);
+	}
 
-	ret = scanhash_metis_opencl(device, algo, thr_id, pdata, ptarget, max_nonce, hashes_done);
+	ret = scanhash_metis_opencl(device, algo, thr_id, data, ptarget, max_nonce, hashes_done);
 	if (ret) {
 		// validates
 		printf("validating share...\n");
-		return validate(pdata, ptarget);
+		return validate(data, ptarget);
 	}
 
 	return ret;
