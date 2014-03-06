@@ -325,7 +325,7 @@ int MetiscoinOpenCLSingle::metiscoin_process(int thr_id, uint32_t *pdata,
 {
 
 
- 	tmp_begin_nonce = swab32(pdata[19]);
+ 	tmp_begin_nonce = pdata[19];
 	tmp_target = ptarget[7];
 	OpenCLDevice* device = OpenCLMain::getInstance().getDevice(device_num);
 #ifdef DEBUG_DATA
