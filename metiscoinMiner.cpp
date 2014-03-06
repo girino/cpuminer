@@ -363,12 +363,12 @@ int MetiscoinOpenCLSingle::metiscoin_process(int thr_id, uint32_t *pdata,
 
 		if (tmp_out_count > 0) {
 			*hashes_done = n * STEP_SIZE;
-			pdata[19] = swab32(out_tmp[0]);
+			pdata[19] = out_tmp[0];
 			return 1;
 		}
 	}
 	*hashes_done = (NUM_STEPS*STEP_SIZE);
-	pdata[19] = swab32(pdata[19] + *hashes_done);
+	pdata[19] = pdata[19] + *hashes_done;
 #ifdef DEBUG_DATA
 	printf("End nonce: %X\n", pdata[19]);
 #endif
