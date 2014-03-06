@@ -5,6 +5,7 @@
 #include "sph_shavite.h"
 #include "sph_metis.h"
 #include "metiscoinminerC.h"
+#include "miner.h"
 #include <stdio.h>
 
 #define DEFAULT_STEP_SIZE 0x80000
@@ -324,7 +325,7 @@ int MetiscoinOpenCLSingle::metiscoin_process(int thr_id, uint32_t *pdata,
 {
 
 
- 	tmp_begin_nonce = bswap_32(pdata[19]);
+ 	tmp_begin_nonce = swab32(pdata[19]);
 	tmp_target = ptarget[7];
 	OpenCLDevice* device = OpenCLMain::getInstance().getDevice(device_num);
 #ifdef DEBUG_DATA
@@ -362,12 +363,12 @@ int MetiscoinOpenCLSingle::metiscoin_process(int thr_id, uint32_t *pdata,
 
 		if (tmp_out_count > 0) {
 			*hashes_done = n * STEP_SIZE;
-			pdata[19] = bswap_32(out_tmp[0]);
+			pdata[19] = swab32(out_tmp[0]);
 			return 1;
 		}
 	}
 	*hashes_done = (NUM_STEPS*STEP_SIZE);
-	pdata[19] = bswap_32(pdata[19] + *hashes_done);
+	pdata[19] = swab32(pdata[19] + *hashes_done);
 #ifdef DEBUG_DATA
 	printf("End nonce: %X\n", pdata[19]);
 #endif
