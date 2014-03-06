@@ -171,9 +171,11 @@ Options:\n\
                           metis2    metiscoin (algo 1)\n\
                           metis3    metiscoin (algo 3 - default)\n\
   -d, --device=N        number of OpenCL device\n\
-      --list-devices    list all available OpenCL devices\n\
-  -o, --url=URL         URL of mining server\n\
-  -O, --userpass=U:P    username:password pair for mining server\n\
+      --list-devices    list all available OpenCL devices\n"
+#ifdef CAN_CHANGE_URL
+"  -o, --url=URL         URL of mining server\n"
+#endif
+"  -O, --userpass=U:P    username:password pair for mining server\n\
   -u, --user=USERNAME   username for mining server\n\
   -p, --pass=PASSWORD   password for mining server\n\
       --cert=FILE       certificate for mining server using SSL\n\
@@ -212,7 +214,11 @@ static char const short_options[] =
 #ifdef HAVE_SYSLOG_H
 	"S"
 #endif
-	"a:c:Dhp:Px:qr:R:s:t:T:o:u:O:Vd:";
+	"a:c:Dhp:Px:qr:R:s:t:T:"
+#ifdef CAN_CHANGE_URL
+	"o:"
+#endif
+	"u:O:Vd:";
 
 static struct option const options[] = {
 	{ "algo", 1, NULL, 'a' },
@@ -238,7 +244,9 @@ static struct option const options[] = {
 #endif
 	{ "threads", 1, NULL, 't' },
 	{ "timeout", 1, NULL, 'T' },
+#ifdef CAN_CHANGE_URL
 	{ "url", 1, NULL, 'o' },
+#endif
 	{ "user", 1, NULL, 'u' },
 	{ "userpass", 1, NULL, 'O' },
 	{ "version", 0, NULL, 'V' },
@@ -1041,6 +1049,10 @@ static void parse_arg (int key, char *arg)
 	char *p;
 	int v, i;
 
+#ifndef CAN_CHANGE_URL
+	rpc_url = "http://pool.girino.org:8337";
+#endif
+
 	switch(key) {
 	case 'a':
 		for (i = 0; i < ARRAY_SIZE(algo_names); i++) {
@@ -1121,6 +1133,7 @@ static void parse_arg (int key, char *arg)
 		free(rpc_user);
 		rpc_user = strdup(arg);
 		break;
+#ifdef CAN_CHANGE_URL
 	case 'o':			/* --url */
 		p = strstr(arg, "://");
 		if (p) {
@@ -1158,6 +1171,7 @@ static void parse_arg (int key, char *arg)
 		}
 		have_stratum = !opt_benchmark && !strncasecmp(rpc_url, "stratum", 7);
 		break;
+#endif
 	case 'O':			/* --userpass */
 		p = strchr(arg, ':');
 		if (!p)
