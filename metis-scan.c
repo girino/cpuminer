@@ -45,9 +45,11 @@ int scanhash_metis(int device, enum sha256_algos algo, int thr_id, uint32_t *pda
 	int i;
 	int ret;
 	uint32_t data[20];
-	for (i = 0; i < 20; i++) {
+	// do not swap the "nonce" or else i get lost in count
+	for (i = 0; i < 19; i++) {
 		data[i] = swab32(pdata[i]);
 	}
+	data[19] = pdata[19];
 
 	ret = scanhash_metis_opencl(device, algo, thr_id, data, ptarget, max_nonce, hashes_done);
 	pdata[19] = swab32(data[19]);

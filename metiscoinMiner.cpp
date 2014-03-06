@@ -346,8 +346,12 @@ int MetiscoinOpenCLSingle::metiscoin_process(int thr_id, uint32_t *pdata,
 	q->enqueueWriteBuffer(buff, ctx_keccak.buf, 4);
 	q->enqueueWriteBuffer(target, &tmp_target, sizeof(cl_uint));
 
-	NUM_STEPS = (max_nonce - tmp_begin_nonce) / STEP_SIZE;
-	if (NUM_STEPS < 1) NUM_STEPS = 1;
+	if (tmp_begin_nonce >= max_nonce) {
+		NUM_STEPS = 1;
+	} else {
+		NUM_STEPS = (max_nonce - tmp_begin_nonce) / STEP_SIZE;
+		if (NUM_STEPS < 1) NUM_STEPS = 1;
+	}
 
 	for (uint32_t n = 0; n < NUM_STEPS; n++)
 	{

@@ -39,7 +39,8 @@
 #include "miner.h"
 
 #define PROGRAM_NAME		"minerd"
-#define LP_SCANTIME		30
+// changed to 10 because the blocktime is so short 30 gives too much stale
+#define LP_SCANTIME		10
 
 #ifdef __linux /* Linux specific policy and affinity management */
 #include <sched.h>
