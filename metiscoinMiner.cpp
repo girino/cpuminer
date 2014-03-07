@@ -8,8 +8,6 @@
 #include "miner.h"
 #include <stdio.h>
 
-#define DEFAULT_STEP_SIZE 0x80000
-
 int log2(size_t value) {
 	int ret = 0;
 	while (value > 1) {
@@ -391,9 +389,9 @@ MetiscoinOpenCL* processors[255];
 int is_processors_inited = 0;
 void init_opencl_miner(int device, enum sha256_algos algo, int thr_id) {
 	switch(algo) {
-	case ALGO_METIS_GPU_1: processors[thr_id] = new MetiscoinOpenCLConstant(device, DEFAULT_STEP_SIZE); break;
-	case ALGO_METIS_GPU_2: processors[thr_id] = new MetiscoinOpenCLGlobal(device, DEFAULT_STEP_SIZE); break;
-	case ALGO_METIS_GPU_3: processors[thr_id] = new MetiscoinOpenCLSingle(device, DEFAULT_STEP_SIZE); break;
+	case ALGO_METIS_GPU_1: processors[thr_id] = new MetiscoinOpenCLConstant(device, opt_step_size); break;
+	case ALGO_METIS_GPU_2: processors[thr_id] = new MetiscoinOpenCLGlobal(device, opt_step_size); break;
+	case ALGO_METIS_GPU_3: processors[thr_id] = new MetiscoinOpenCLSingle(device, opt_step_size); break;
 
 	}
 }

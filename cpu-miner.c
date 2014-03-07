@@ -147,6 +147,7 @@ static struct stratum_ctx stratum;
 #define MAX_DEVICES 255
 static int numdevices = 0;
 static int device_nums[MAX_DEVICES];
+int opt_step_size = 1<<19;
 
 pthread_mutex_t applog_lock;
 static pthread_mutex_t stats_lock;
@@ -177,7 +178,9 @@ Options:\n\
                           metis3    metiscoin (algo 3 - default)\n\
   -d, --device=N        single OpenCL device number (see --list-devices)\n\
   -d, --device=N,N,N    list of OpenCL device numbers (see --list-devices)\n\
-      --list-devices    list all available OpenCL devices\n"
+      --list-devices    list all available OpenCL devices\n\
+  -I, --step-size=N     N^2 is the number of hashes to be processed on each step\n\
+                        typically a number between 15 and 27. default is 19\n"
 #ifdef CAN_CHANGE_URL
 "  -o, --url=URL         URL of mining server\n"
 #endif
@@ -224,7 +227,7 @@ static char const short_options[] =
 #ifdef CAN_CHANGE_URL
 	"o:"
 #endif
-	"u:O:Vd:";
+	"u:O:Vd:I:";
 
 static struct option const options[] = {
 	{ "algo", 1, NULL, 'a' },
@@ -257,6 +260,7 @@ static struct option const options[] = {
 	{ "userpass", 1, NULL, 'O' },
 	{ "version", 0, NULL, 'V' },
 	{ "device", 1, NULL, 'd' },
+	{ "step-size", 1, NULL, 'I' },
 	{ "list-devices", 0, NULL, 1010 },
 	{ 0, 0, 0, 0 }
 };
@@ -1103,6 +1107,9 @@ static void parse_arg (int key, char *arg)
 			device_nums[numdevices] = atoi(tok);
 			numdevices++;
 		}
+		break;
+	case 'I':
+		opt_step_size = 1<<atoi(arg);
 		break;
 	case 'p':
 		free(rpc_pass);
