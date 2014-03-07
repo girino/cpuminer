@@ -1396,6 +1396,9 @@ int main(int argc, char *argv[])
 		num_processors = 1;
 	if (!opt_n_threads)
 		opt_n_threads = num_processors;
+	if (opt_algo >= ALGO_METIS_GPU_1) {
+		opt_n_threads = 1;
+	}
 	// now, if used devices options, change numthreads to num devices:
 	if (numdevices > 0) {
 		opt_n_threads = numdevices;
