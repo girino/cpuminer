@@ -128,7 +128,6 @@ static int opt_scantime = 5;
 static json_t *opt_config;
 static const bool opt_time = true;
 static enum sha256_algos opt_algo = ALGO_METIS_GPU_3;
-static int device = 0;
 static int opt_n_threads;
 static int num_processors;
 static char *rpc_url;
@@ -143,6 +142,11 @@ int longpoll_thr_id = -1;
 int stratum_thr_id = -1;
 struct work_restart *work_restart = NULL;
 static struct stratum_ctx stratum;
+
+// devices
+#define MAX_DEVICES 255
+static int numdevices = 0;
+static int device_nums[MAX_DEVICES];
 
 pthread_mutex_t applog_lock;
 static pthread_mutex_t stats_lock;
@@ -171,7 +175,8 @@ Options:\n\
                           metis1    metiscoin (algo 1)\n\
                           metis2    metiscoin (algo 1)\n\
                           metis3    metiscoin (algo 3 - default)\n\
-  -d, --device=N        number of OpenCL device\n\
+  -d, --device=N        single OpenCL device number (see --list-devices)\n\
+  -d, --device=N,N,N    list of OpenCL device numbers (see --list-devices)\n\
       --list-devices    list all available OpenCL devices\n"
 #ifdef CAN_CHANGE_URL
 "  -o, --url=URL         URL of mining server\n"
@@ -786,7 +791,7 @@ static void *miner_thread(void *userdata)
 		case ALGO_METIS_GPU_1:
 		case ALGO_METIS_GPU_2:
 		case ALGO_METIS_GPU_3:
-			rc = scanhash_metis(device, opt_algo,thr_id, work.data, work.target,
+			rc = scanhash_metis(device_nums[thr_id], opt_algo,thr_id, work.data, work.target,
 			                      max_nonce, &hashes_done);
 			break;
 
@@ -1091,7 +1096,13 @@ static void parse_arg (int key, char *arg)
 		opt_debug = true;
 		break;
 	case 'd':
-		device = atoi(arg);
+		p = strdup(arg);
+		numdevices = 0;
+		for (char *tok = strtok(p,","); tok != NULL && numdevices < MAX_DEVICES; tok = strtok(NULL, ","))
+		{
+			device_nums[numdevices] = atoi(tok);
+			numdevices++;
+		}
 		break;
 	case 'p':
 		free(rpc_pass);
@@ -1377,7 +1388,11 @@ int main(int argc, char *argv[])
 	if (num_processors < 1)
 		num_processors = 1;
 	if (!opt_n_threads)
-		opt_n_threads = 1; //num_processors;
+		opt_n_threads = num_processors;
+	// now, if used devices options, change numthreads to num devices:
+	if (numdevices > 0) {
+		opt_n_threads = numdevices;
+	}
 
 #ifdef HAVE_SYSLOG_H
 	if (use_syslog)

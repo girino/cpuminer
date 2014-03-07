@@ -382,16 +382,18 @@ int MetiscoinOpenCLSingle::metiscoin_process(int thr_id, uint32_t *pdata,
 
 extern "C" {
 
+
 void list_devices() {
 	OpenCLMain::getInstance().listDevices();
 }
 
-MetiscoinOpenCL* processor = NULL;
-void init_opencl_miner(int device, enum sha256_algos algo) {
+MetiscoinOpenCL* processors[255];
+int is_processors_inited = 0;
+void init_opencl_miner(int device, enum sha256_algos algo, int thr_id) {
 	switch(algo) {
-	case ALGO_METIS_GPU_1: processor = new MetiscoinOpenCLConstant(device, DEFAULT_STEP_SIZE); break;
-	case ALGO_METIS_GPU_2: processor = new MetiscoinOpenCLGlobal(device, DEFAULT_STEP_SIZE); break;
-	case ALGO_METIS_GPU_3: processor = new MetiscoinOpenCLSingle(device, DEFAULT_STEP_SIZE); break;
+	case ALGO_METIS_GPU_1: processors[thr_id] = new MetiscoinOpenCLConstant(device, DEFAULT_STEP_SIZE); break;
+	case ALGO_METIS_GPU_2: processors[thr_id] = new MetiscoinOpenCLGlobal(device, DEFAULT_STEP_SIZE); break;
+	case ALGO_METIS_GPU_3: processors[thr_id] = new MetiscoinOpenCLSingle(device, DEFAULT_STEP_SIZE); break;
 
 	}
 }
@@ -399,11 +401,17 @@ int scanhash_metis_opencl(int device, enum sha256_algos algo, int thr_id, uint32
 	const uint32_t *ptarget,
 	uint32_t max_nonce, unsigned long *hashes_done) {
 
-	if (processor == NULL) {
-		init_opencl_miner(device, algo);
+	int i;
+
+	if (!is_processors_inited) {
+		is_processors_inited = 1;
+		for (i = 0; i < 255; i++) processors[i] = NULL;
+	}
+	if (processors[thr_id] == NULL) {
+		init_opencl_miner(device, algo, thr_id);
 	}
 
-	return processor->metiscoin_process(thr_id, pdata,	ptarget, max_nonce, hashes_done);
+	return processors[thr_id]->metiscoin_process(thr_id, pdata,	ptarget, max_nonce, hashes_done);
 
 }
 }
