@@ -792,10 +792,15 @@ static void *miner_thread(void *userdata)
 			                      max_nonce, &hashes_done);
 			break;
 
+		case ALGO_METIS_CPU:
+			rc = scanhash_metis_cpu(thr_id, work.data, work.target,
+						                      max_nonce, &hashes_done);
+			break;
+
 		case ALGO_METIS_GPU_1:
 		case ALGO_METIS_GPU_2:
 		case ALGO_METIS_GPU_3:
-			rc = scanhash_metis(device_nums[thr_id], opt_algo,thr_id, work.data, work.target,
+			rc = scanhash_metis_gpu(device_nums[thr_id], opt_algo,thr_id, work.data, work.target,
 			                      max_nonce, &hashes_done);
 			break;
 
