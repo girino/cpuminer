@@ -61,16 +61,16 @@ single_noinit(constant uint* restrict in,
 
     uint2 ARGS_25(state);
 
-	state0 = (swap32(in[0]), swap32(in[1]));
-    	state1 = (swap32(in[2]), swap32(in[3]));
-    	state2 = (swap32(in[4]), swap32(in[5]));
-    	state3 = (swap32(in[6]), swap32(in[7]));
-    	state4 = (swap32(in[8]), swap32(in[9]));
-    	state5 = (swap32(in[10]]), swap32(in[11]));
-    	state6 = (swap32(in[12]), swap32(in[13]));
-    	state7 = (swap32(in[14), swap32(in[15]));
-    	state8 = (swap32(in[16]), swap32(in[17]));
-    	state9 = (uint2)(swap32(in[18]),nonce);
+	state0 = (SWAP32(in[0]), SWAP32(in[1]));
+    	state1 = (SWAP32(in[2]), SWAP32(in[3]));
+    	state2 = (SWAP32(in[4]), SWAP32(in[5]));
+    	state3 = (SWAP32(in[6]), SWAP32(in[7]));
+    	state4 = (SWAP32(in[8]), SWAP32(in[9]));
+    	state5 = (SWAP32(in[10]]), SWAP32(in[11]));
+    	state6 = (SWAP32(in[12]), SWAP32(in[13]));
+    	state7 = (SWAP32(in[14), SWAP32(in[15]));
+    	state8 = (SWAP32(in[16]), SWAP32(in[17]));
+    	state9 = (uint2)(SWAP32(in[18]),SWAP32(nonce));
     	state10 = (uint2)(1,0);
     	state11 = 0;
     	state12 = 0;
@@ -88,15 +88,23 @@ single_noinit(constant uint* restrict in,
     	state24 = 0;
 
     	keccak_block_noabsorb(ARGS_25(&state));
-        // WRITE_STATE
-        hash[0] =  as_ulong(state0);
-        hash[1] = as_ulong(~state1);
-        hash[2] = as_ulong(~state2);
-        hash[3] =  as_ulong(state3);
-        hash[4] =  as_ulong(state4);
-        hash[5] =  as_ulong(state5);
-        hash[6] =  as_ulong(state6);
-        hash[7] =  as_ulong(state7);
+    	/* Finalize the "lane complement" */
+    	state1 = ~state1;
+    	state2 = ~state2;
+    	state8 = ~state8;
+    	state12 = ~state12;
+    	state17 = ~state17;
+    	state20 = ~state20;
+    	sph_enc64le_aligned(hash+0, state0);
+    	sph_enc64le_aligned(hash+1, state1);
+    	sph_enc64le_aligned(hash+2, state2);
+    	sph_enc64le_aligned(hash+3, state3);
+    	sph_enc64le_aligned(hash+4, state4);
+    	sph_enc64le_aligned(hash+5, state5);
+    	sph_enc64le_aligned(hash+6, state6);
+    	sph_enc64le_aligned(hash+7, state7);
+
+
 
     wait_group_events(1, &eshavite);
     shavite((local uint *)hash,
