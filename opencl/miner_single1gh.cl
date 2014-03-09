@@ -20,7 +20,6 @@
 void
 sph_enc64le_aligned(local void *dst, sph_u64 val)
 {
-	*(sph_u64 *)dst = val;
 	((local unsigned char *)dst)[0] = val;
 	((local unsigned char *)dst)[1] = (val >> 8);
 	((local unsigned char *)dst)[2] = (val >> 16);
@@ -29,7 +28,6 @@ sph_enc64le_aligned(local void *dst, sph_u64 val)
 	((local unsigned char *)dst)[5] = (val >> 40);
 	((local unsigned char *)dst)[6] = (val >> 48);
 	((local unsigned char *)dst)[7] = (val >> 56);
-#endif
 }
 
 kernel KERNEL_ATTRIB void 
