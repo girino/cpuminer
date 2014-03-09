@@ -107,14 +107,14 @@ single_noinit(constant uint2* restrict in,
     	state12 = ~state12;
     	state17 = ~state17;
     	state20 = ~state20;
-    	sph_enc64le_aligned(hash+0, state0);
-    	sph_enc64le_aligned(hash+1, state1);
-    	sph_enc64le_aligned(hash+2, state2);
-    	sph_enc64le_aligned(hash+3, state3);
-    	sph_enc64le_aligned(hash+4, state4);
-    	sph_enc64le_aligned(hash+5, state5);
-    	sph_enc64le_aligned(hash+6, state6);
-    	sph_enc64le_aligned(hash+7, state7);
+    	sph_enc64le_aligned(hash+0, as_ulong(state0));
+    	sph_enc64le_aligned(hash+1, as_ulong(state1));
+    	sph_enc64le_aligned(hash+2, as_ulong(state2));
+    	sph_enc64le_aligned(hash+3, as_ulong(state3));
+    	sph_enc64le_aligned(hash+4, as_ulong(state4));
+    	sph_enc64le_aligned(hash+5, as_ulong(state5));
+    	sph_enc64le_aligned(hash+6, as_ulong(state6));
+    	sph_enc64le_aligned(hash+7, as_ulong(state7));
 
 
 
