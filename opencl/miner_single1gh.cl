@@ -84,7 +84,7 @@ single_noinit(constant uint2* restrict in,
     	state6 = in[6];
     	state7 = in[7];
     	state8 = in[8];
-    	state9 = (uint2)(in[18],nonce);
+    	state9 = (uint2)(in[18].x,nonce);
     	state10 = (uint2)(1,0);
     	state11 = 0;
     	state12 = 0;
