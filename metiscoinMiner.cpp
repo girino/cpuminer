@@ -455,9 +455,9 @@ int MetiscoinOpenCLSingle1ghKeccak::metiscoin_process(int thr_id, uint32_t *pdat
 
 	sph_keccak512_context	 ctx_keccak;
 	sph_keccak512_init(&ctx_keccak);
-	sph_keccak512(&ctx_keccak, pdata, 80);
+	//sph_keccak512(&ctx_keccak, pdata, 80);
 
-	q->enqueueWriteBuffer(u, ctx_keccak.u.narrow, 25*sizeof(cl_ulong));
+	q->enqueueWriteBuffer(u, pdata, 80);
 	q->enqueueWriteBuffer(buff, ctx_keccak.buf, 4);
 	q->enqueueWriteBuffer(target, &tmp_target, sizeof(cl_uint));
 
