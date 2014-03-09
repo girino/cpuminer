@@ -19,9 +19,11 @@ minerd_SOURCES	= elist.h miner.h compat.h \
 		  cpu-miner.c util.c \
 		  sha2.c scrypt.c \
 		  metis-scan.c metis.c \
-		  keccak.c shavite.c \
-		  OpenCLObjects.cpp metiscoinMiner.cpp
-minerd_LDFLAGS	= $(PTHREAD_FLAGS)
+		  keccak.c shavite.c
+if WANT_OPENCL
+minerd_SOURCES += OpenCLObjects.cpp metiscoinMiner.cpp
+endif
+minerd_LDFLAGS	= $(PTHREAD_FLAGS) 
 minerd_LDADD	= @LIBCURL@ @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@ @OPENCL_LIBS@
-minerd_CPPFLAGS = @LIBCURL_CPPFLAGS@
+minerd_CPPFLAGS = @LIBCURL_CPPFLAGS@ @OPENCL_CPPFLAGS@
 

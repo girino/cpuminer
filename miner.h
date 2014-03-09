@@ -256,9 +256,11 @@ enum sha256_algos {
 	ALGO_SCRYPT,		/* scrypt(1024,1,1) */
 	ALGO_SHA256D,		/* SHA-256d */
 	ALGO_METIS_CPU,			/* metis */
+#ifndef NO_OPENCL
 	ALGO_METIS_GPU_1,			/* metis */
 	ALGO_METIS_GPU_2,			/* metis */
 	ALGO_METIS_GPU_3,			/* metis */
+#endif
 };
 
 

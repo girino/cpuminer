@@ -39,6 +39,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#ifndef NO_OPENCL
 int scanhash_metis_gpu(int device, enum sha256_algos algo, int thr_id, uint32_t *pdata,
 	const uint32_t *ptarget,
 	uint32_t max_nonce, unsigned long *hashes_done) {
@@ -63,7 +64,7 @@ int scanhash_metis_gpu(int device, enum sha256_algos algo, int thr_id, uint32_t 
 	return ret;
 
 }
-
+#endif
 
 int validate(const uint32_t *pdata,
 	const uint32_t *ptarget)

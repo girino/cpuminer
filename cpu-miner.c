@@ -105,9 +105,11 @@ static const char *algo_names[] = {
 	[ALGO_SCRYPT]		= "scrypt",
 	[ALGO_SHA256D]		= "sha256d",
 	[ALGO_METIS_CPU]		= "metiscpu",
+#ifndef NO_OPENCL
 	[ALGO_METIS_GPU_1]		= "metis1",
 	[ALGO_METIS_GPU_2]		= "metis2",
 	[ALGO_METIS_GPU_3]		= "metis3",
+#endif
 };
 
 bool opt_debug = false;
@@ -127,7 +129,11 @@ int opt_timeout = 270;
 static int opt_scantime = 5;
 static json_t *opt_config;
 static const bool opt_time = true;
+#ifndef NO_OPENCL
 static enum sha256_algos opt_algo = ALGO_METIS_GPU_3;
+#else
+static enum sha256_algos opt_algo = ALGO_METIS_CPU;
+#endif
 static int opt_n_threads;
 static int num_processors;
 static char *rpc_url;
@@ -175,12 +181,14 @@ Options:\n\
                           sha256d   SHA-256d\n\
                           metis1    metiscoin (algo 1)\n\
                           metis2    metiscoin (algo 1)\n\
-                          metis3    metiscoin (algo 3 - default)\n\
-  -d, --device=N        single OpenCL device number (see --list-devices)\n\
+                          metis3    metiscoin (algo 3 - default)\n"
+#ifndef NO_OPENCL
+"  -d, --device=N        single OpenCL device number (see --list-devices)\n\
   -d, --device=N,N,N    list of OpenCL device numbers (see --list-devices)\n\
       --list-devices    list all available OpenCL devices\n\
   -I, --step-size=N     N^2 is the number of hashes to be processed on each step\n\
                         typically a number between 15 and 27. default is 19\n"
+#endif
 #ifdef CAN_CHANGE_URL
 "  -o, --url=URL         URL of mining server\n"
 #endif
@@ -261,7 +269,9 @@ static struct option const options[] = {
 	{ "version", 0, NULL, 'V' },
 	{ "device", 1, NULL, 'd' },
 	{ "step-size", 1, NULL, 'I' },
+#ifndef NO_OPENCL
 	{ "list-devices", 0, NULL, 1010 },
+#endif
 	{ 0, 0, 0, 0 }
 };
 
@@ -796,14 +806,14 @@ static void *miner_thread(void *userdata)
 			rc = scanhash_metis_cpu(thr_id, work.data, work.target,
 						                      max_nonce, &hashes_done);
 			break;
-
+#ifndef NO_OPENCL
 		case ALGO_METIS_GPU_1:
 		case ALGO_METIS_GPU_2:
 		case ALGO_METIS_GPU_3:
 			rc = scanhash_metis_gpu(device_nums[thr_id], opt_algo,thr_id, work.data, work.target,
 			                      max_nonce, &hashes_done);
 			break;
-
+#endif
 		default:
 			/* should never happen */
 			goto out;
@@ -1044,11 +1054,13 @@ static void show_version_and_exit(void)
 	exit(0);
 }
 
+#ifndef NO_OPENCL
 static void list_devices_and_exit(void)
 {
 	list_devices();
 	exit(0);
 }
+#endif
 
 static void show_usage_and_exit(int status)
 {
@@ -1247,8 +1259,10 @@ static void parse_arg (int key, char *arg)
 		show_version_and_exit();
 	case 'h':
 		show_usage_and_exit(0);
+#ifndef NO_OPENCL
 	case 1010:
 		list_devices_and_exit();
+#endif
 	default:
 		show_usage_and_exit(1);
 	}
@@ -1401,6 +1415,7 @@ int main(int argc, char *argv[])
 		num_processors = 1;
 	if (!opt_n_threads)
 		opt_n_threads = num_processors;
+#ifndef NO_OPENCL
 	if (opt_algo >= ALGO_METIS_GPU_1) {
 		opt_n_threads = 1;
 	}
@@ -1408,6 +1423,7 @@ int main(int argc, char *argv[])
 	if (numdevices > 0) {
 		opt_n_threads = numdevices;
 	}
+#endif
 
 #ifdef HAVE_SYSLOG_H
 	if (use_syslog)

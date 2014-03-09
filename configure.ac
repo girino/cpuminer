@@ -63,28 +63,39 @@ case $target in
 esac
 
 dnl Figure out where OpenCL is, either passed or system-wide
+AC_ARG_WITH([no-opencl],
+	[AC_HELP_STRING([--with-no-opencl],[disable OpenCL])],
+	[with_opencl="no"],
+	[with_opencl="yes"])
 AC_ARG_WITH([opencl-framework],
 	[AC_HELP_STRING([--with-opencl-framework],[use OpenCL framework (OSX)])],
 	[with_opencl_framework="yes"],
 	[with_opencl_framework="no"])
-if test "x$with_opencl_framework" = xno; then
-	AC_CHECK_LIB([OpenCL], [clGetPlatformIDs], [OPENCL_LIBS="-lOpenCL"], AC_MSG_ERROR([OpenCL library could not be found]))
-else
-	OPENCL_LIBS="-framework OpenCL"
-fi
+if test "x$with_opencl" = xno; then
 OPENCL_INCLUDES=""
-AC_ARG_WITH([opencl-inc],
-	[AC_HELP_STRING([--with-opencl-inc],[specify OpenCL include paths])],
-	[with_opencl_inc=$withval],
-	[with_opencl_inc="auto"])
-if test "x$with_opencl_inc" = xauto; then
-	AC_CHECK_HEADERS(CL/cl.h, [found="yes"])
-	AC_CHECK_HEADERS(OpenCL/opencl.h, [found="yes"])
-	if test "x$found" = x; then
-		AC_MSG_ERROR([OpenCL headers could not be found])
-	fi
+OPENCL_LIBS=""
+OPENCL_CPPFLAGS="-DNO_OPENCL"
 else
-	OPENCL_INCLUDES="-I$with_opencl_inc"
+	OPENCL_CPPFLAGS=""
+	if test "x$with_opencl_framework" = xno; then
+		AC_CHECK_LIB([OpenCL], [clGetPlatformIDs], [OPENCL_LIBS="-lOpenCL"], AC_MSG_ERROR([OpenCL library could not be found]))
+	else
+		OPENCL_LIBS="-framework OpenCL"
+	fi
+	OPENCL_INCLUDES=""
+	AC_ARG_WITH([opencl-inc],
+		[AC_HELP_STRING([--with-opencl-inc],[specify OpenCL include paths])],
+		[with_opencl_inc=$withval],
+		[with_opencl_inc="auto"])
+	if test "x$with_opencl_inc" = xauto; then
+		AC_CHECK_HEADERS(CL/cl.h, [found="yes"])
+		AC_CHECK_HEADERS(OpenCL/opencl.h, [found="yes"])
+		if test "x$found" = x; then
+			AC_MSG_ERROR([OpenCL headers could not be found])
+		fi
+	else
+		OPENCL_INCLUDES="-I$with_opencl_inc"
+	fi
 fi
 
 
@@ -101,6 +112,7 @@ AM_CONDITIONAL([HAVE_WINDOWS], [test x$have_win32 = xtrue])
 AM_CONDITIONAL([ARCH_x86], [test x$have_x86 = xtrue])
 AM_CONDITIONAL([ARCH_x86_64], [test x$have_x86_64 = xtrue])
 AM_CONDITIONAL([ARCH_ARM], [test x$have_arm = xtrue])
+AM_CONDITIONAL([WANT_OPENCL], [test x$with_opencl = xyes])
 
 if test x$request_jansson = xtrue
 then
@@ -118,6 +130,7 @@ AC_SUBST(JANSSON_LIBS)
 AC_SUBST(PTHREAD_FLAGS)
 AC_SUBST(PTHREAD_LIBS)
 AC_SUBST(WS2_LIBS)
+AC_SUBST(OPENCL_CPPFLAGS)
 
 AC_CONFIG_FILES([
 	Makefile
