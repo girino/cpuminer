@@ -18,21 +18,17 @@
 //	kernel_single_noinit->addGlobalArg(target);
 
 void
-sph_enc64le_aligned(void *dst, sph_u64 val)
+sph_enc64le_aligned(local void *dst, sph_u64 val)
 {
-#if SPH_LITTLE_ENDIAN
 	*(sph_u64 *)dst = val;
-#elif SPH_BIG_ENDIAN
-	*(sph_u64 *)dst = sph_bswap64(val);
-#else
-	((unsigned char *)dst)[0] = val;
-	((unsigned char *)dst)[1] = (val >> 8);
-	((unsigned char *)dst)[2] = (val >> 16);
-	((unsigned char *)dst)[3] = (val >> 24);
-	((unsigned char *)dst)[4] = (val >> 32);
-	((unsigned char *)dst)[5] = (val >> 40);
-	((unsigned char *)dst)[6] = (val >> 48);
-	((unsigned char *)dst)[7] = (val >> 56);
+	((local unsigned char *)dst)[0] = val;
+	((local unsigned char *)dst)[1] = (val >> 8);
+	((local unsigned char *)dst)[2] = (val >> 16);
+	((local unsigned char *)dst)[3] = (val >> 24);
+	((local unsigned char *)dst)[4] = (val >> 32);
+	((local unsigned char *)dst)[5] = (val >> 40);
+	((local unsigned char *)dst)[6] = (val >> 48);
+	((local unsigned char *)dst)[7] = (val >> 56);
 #endif
 }
 
@@ -113,14 +109,14 @@ single_noinit(constant uint* restrict in,
     	state12 = ~state12;
     	state17 = ~state17;
     	state20 = ~state20;
-    	sph_enc64le_aligned((void*)(hash+0), state0);
-    	sph_enc64le_aligned((void*)(hash+1), state1);
-    	sph_enc64le_aligned((void*)(hash+2), state2);
-    	sph_enc64le_aligned((void*)(hash+3), state3);
-    	sph_enc64le_aligned((void*)(hash+4), state4);
-    	sph_enc64le_aligned((void*)(hash+5), state5);
-    	sph_enc64le_aligned((void*)(hash+6), state6);
-    	sph_enc64le_aligned((void*)(hash+7), state7);
+    	sph_enc64le_aligned(hash+0, state0);
+    	sph_enc64le_aligned(hash+1, state1);
+    	sph_enc64le_aligned(hash+2, state2);
+    	sph_enc64le_aligned(hash+3, state3);
+    	sph_enc64le_aligned(hash+4, state4);
+    	sph_enc64le_aligned(hash+5, state5);
+    	sph_enc64le_aligned(hash+6, state6);
+    	sph_enc64le_aligned(hash+7, state7);
 
 
 
