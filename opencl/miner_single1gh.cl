@@ -18,7 +18,7 @@
 //	kernel_single_noinit->addGlobalArg(target);
 
 void
-sph_enc64le_aligned(local void *dst, sph_u64 val)
+sph_enc64le_aligned(local void *dst, ulong val)
 {
 	((local unsigned char *)dst)[0] = val;
 	((local unsigned char *)dst)[1] = (val >> 8);
