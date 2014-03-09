@@ -19,7 +19,7 @@
 
 
 kernel KERNEL_ATTRIB void 
-single_noinit(constant uint2* restrict in,
+single_noinit(constant uint* restrict in,
                    constant uint*  restrict buf,
                    local    ulong* restrict hashes,
               	   global   uint*  restrict AES,
@@ -61,16 +61,16 @@ single_noinit(constant uint2* restrict in,
 
     uint2 ARGS_25(state);
 
-    	state0 = in[0];
-    	state1 = in[1];
-    	state2 = in[2];
-    	state3 = in[3];
-    	state4 = in[4];
-    	state5 = in[5];
-    	state6 = in[6];
-    	state7 = in[7];
-    	state8 = in[8];
-    	state9 = (uint2)(in[9].x,nonce);
+	state0 = (swap32(in[0]), swap32(in[1]));
+    	state1 = (swap32(in[2]), swap32(in[3]));
+    	state2 = (swap32(in[4]), swap32(in[5]));
+    	state3 = (swap32(in[6]), swap32(in[7]));
+    	state4 = (swap32(in[8]), swap32(in[9]));
+    	state5 = (swap32(in[10]]), swap32(in[11]));
+    	state6 = (swap32(in[12]), swap32(in[13]));
+    	state7 = (swap32(in[14), swap32(in[15]));
+    	state8 = (swap32(in[16]), swap32(in[17]));
+    	state9 = (uint2)(swap32(in[18]),nonce);
     	state10 = (uint2)(1,0);
     	state11 = 0;
     	state12 = 0;
