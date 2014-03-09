@@ -33,7 +33,7 @@ sph_enc64le_aligned(local void *dst, sph_u64 val)
 }
 
 kernel KERNEL_ATTRIB void 
-single_noinit(constant uint* restrict in,
+single_noinit(constant uint2* restrict in,
                    constant uint*  restrict buf,
                    local    ulong* restrict hashes,
               	   global   uint*  restrict AES,
@@ -75,16 +75,16 @@ single_noinit(constant uint* restrict in,
 
     uint2 ARGS_25(state);
 
-	state0 = (SWAP32(in[0]), SWAP32(in[1]));
-    	state1 = (SWAP32(in[2]), SWAP32(in[3]));
-    	state2 = (SWAP32(in[4]), SWAP32(in[5]));
-    	state3 = (SWAP32(in[6]), SWAP32(in[7]));
-    	state4 = (SWAP32(in[8]), SWAP32(in[9]));
-    	state5 = (SWAP32(in[10]]), SWAP32(in[11]));
-    	state6 = (SWAP32(in[12]), SWAP32(in[13]));
-    	state7 = (SWAP32(in[14), SWAP32(in[15]));
-    	state8 = (SWAP32(in[16]), SWAP32(in[17]));
-    	state9 = (uint2)(SWAP32(in[18]),SWAP32(nonce));
+    state0 = in[0];
+    	state1 = in[1];
+    	state2 = in[2];
+    	state3 = in[3];
+    	state4 = in[4];
+    	state5 = in[5];
+    	state6 = in[6];
+    	state7 = in[7];
+    	state8 = in[8];
+    	state9 = (uint2)(in[18],nonce);
     	state10 = (uint2)(1,0);
     	state11 = 0;
     	state12 = 0;
