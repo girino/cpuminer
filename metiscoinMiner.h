@@ -81,4 +81,19 @@ private:
 	OpenCLBuffer* fugue_lookup;
 };
 
+class MetiscoinOpenCLSingle1ghKeccak : public MetiscoinOpenCL {
+public:
+
+	MetiscoinOpenCLSingle1ghKeccak(int _device_num, uint32_t _step_size);
+	int metiscoin_process(int thr_id, uint32_t *pdata,
+			const uint32_t *ptarget,
+			uint32_t max_nonce, unsigned long *hashes_done);
+private:
+
+	OpenCLKernel* kernel_single_noinit;
+
+	OpenCLBuffer* shavite_lookup;
+	OpenCLBuffer* fugue_lookup;
+};
+
 #endif
