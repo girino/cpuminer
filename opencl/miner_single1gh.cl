@@ -17,6 +17,24 @@
 //	kernel_single_noinit->addGlobalArg(begin_nonce);
 //	kernel_single_noinit->addGlobalArg(target);
 
+void
+sph_enc64le_aligned(void *dst, sph_u64 val)
+{
+#if SPH_LITTLE_ENDIAN
+	*(sph_u64 *)dst = val;
+#elif SPH_BIG_ENDIAN
+	*(sph_u64 *)dst = sph_bswap64(val);
+#else
+	((unsigned char *)dst)[0] = val;
+	((unsigned char *)dst)[1] = (val >> 8);
+	((unsigned char *)dst)[2] = (val >> 16);
+	((unsigned char *)dst)[3] = (val >> 24);
+	((unsigned char *)dst)[4] = (val >> 32);
+	((unsigned char *)dst)[5] = (val >> 40);
+	((unsigned char *)dst)[6] = (val >> 48);
+	((unsigned char *)dst)[7] = (val >> 56);
+#endif
+}
 
 kernel KERNEL_ATTRIB void 
 single_noinit(constant uint* restrict in,
