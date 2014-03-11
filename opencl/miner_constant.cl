@@ -211,7 +211,7 @@ metis_step(global   ulong* restrict in,
     }
 #endif
 
-    if( uint hash_bytes_28_to_32 <= *target )
+    if( hash_bytes_28_to_32 <= *target )
     {
         out[atomic_inc(outcount)] = nonce;
     }
