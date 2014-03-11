@@ -454,16 +454,17 @@ metis(HASHES_MODIFIER uint *in_out,
      S0 ^= S32;  S6 ^= S32; S15 ^= S32; S24 ^= S32;
     SMIX(S24, S25, S26, S27);
     // i = 12
-    //S28 ^= S24;
+//    S28 ^= S24;
     S33 ^= S24;  S6 ^= S24; S15 ^= S24;
     SMIX(S15, S16, S17, S18);
-    //S19 ^= S15; S25 ^= S15;
+//    S19 ^= S15; S25 ^= S15;
     S33 ^= S15;  S6 ^= S15;
     SMIX( S6,  S7,  S8,  S9);
-    //S10 ^=  S6; S16 ^=  S6; S25 ^=  S6;
+//    S10 ^=  S6; S16 ^=  S6; S25 ^=  S6;
     S33 ^=  S6;
     SMIX(S33, S34, S35,  S0);
-     S1 ^= S33;  // S7 ^= S33; S16 ^= S33; S25 ^= S33;
+     S1 ^= S33;
+//     S7 ^= S33; S16 ^= S33; S25 ^= S33;
 //    SMIX(S25, S26, S27, S28);
 
     // Copy to output
