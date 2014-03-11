@@ -75,7 +75,7 @@
 }
 
 
-void
+uint
 metis(HASHES_MODIFIER uint *in_out,
       local uint* restrict local_mixtab0,
       local uint* restrict local_mixtab1,
@@ -454,37 +454,49 @@ metis(HASHES_MODIFIER uint *in_out,
      S0 ^= S32;  S6 ^= S32; S15 ^= S32; S24 ^= S32;
     SMIX(S24, S25, S26, S27);
     // i = 12
-//    S28 ^= S24;
+#ifdef VALIDATE_ALGORITHMS
+    S28 ^= S24;
+#endif
     S33 ^= S24;  S6 ^= S24; S15 ^= S24;
     SMIX(S15, S16, S17, S18);
-//    S19 ^= S15; S25 ^= S15;
+#ifdef VALIDATE_ALGORITHMS
+    S19 ^= S15; S25 ^= S15;
+#endif
     S33 ^= S15;  S6 ^= S15;
     SMIX( S6,  S7,  S8,  S9);
-//    S10 ^=  S6; S16 ^=  S6; S25 ^=  S6;
+#ifdef VALIDATE_ALGORITHMS
+    S10 ^=  S6; S16 ^=  S6; S25 ^=  S6;
+#endif
     S33 ^=  S6;
     SMIX(S33, S34, S35,  S0);
      S1 ^= S33;
-//     S7 ^= S33; S16 ^= S33; S25 ^= S33;
-//    SMIX(S25, S26, S27, S28);
+#ifdef VALIDATE_ALGORITHMS
+     S7 ^= S33; S16 ^= S33; S25 ^= S33;
+    SMIX(S25, S26, S27, S28);
+#endif
 
+#ifdef VALIDATE_ALGORITHMS
     // Copy to output
-//    S29 ^= S25; S34 ^= S25;  S7 ^= S25; S16 ^= S25;
-//    in_out[0x00] = SWAP32(S26);
-//    in_out[0x01] = SWAP32(S27);
-//    in_out[0x02] = SWAP32(S28);
-//    in_out[0x03] = SWAP32(S29);
-//    in_out[0x04] = SWAP32(S34);
-//    in_out[0x05] = SWAP32(S35);
-//    in_out[0x06] = SWAP32( S0);
+    S29 ^= S25; S34 ^= S25;  S7 ^= S25; S16 ^= S25;
+    in_out[0x00] = SWAP32(S26);
+    in_out[0x01] = SWAP32(S27);
+    in_out[0x02] = SWAP32(S28);
+    in_out[0x03] = SWAP32(S29);
+    in_out[0x04] = SWAP32(S34);
+    in_out[0x05] = SWAP32(S35);
+    in_out[0x06] = SWAP32( S0);
     in_out[0x07] = SWAP32( S1);
-//    in_out[0x08] = SWAP32( S7);
-//    in_out[0x09] = SWAP32( S8);
-//    in_out[0x0A] = SWAP32( S9);
-//    in_out[0x0B] = SWAP32(S10);
-//    in_out[0x0C] = SWAP32(S16);
-//    in_out[0x0D] = SWAP32(S17);
-//    in_out[0x0E] = SWAP32(S18);
-//    in_out[0x0F] = SWAP32(S19);
+    in_out[0x08] = SWAP32( S7);
+    in_out[0x09] = SWAP32( S8);
+    in_out[0x0A] = SWAP32( S9);
+    in_out[0x0B] = SWAP32(S10);
+    in_out[0x0C] = SWAP32(S16);
+    in_out[0x0D] = SWAP32(S17);
+    in_out[0x0E] = SWAP32(S18);
+    in_out[0x0F] = SWAP32(S19);
+#endif
+
+     return SWAP32( S1);
 }
 
 

@@ -66,11 +66,11 @@ single_noinit(constant ulong* restrict wide,
             shavite_lookup2,
             shavite_lookup3);
     wait_group_events(1, &efugue);
-    metis((local uint *)hash,
-          local_mixtab0,
-          local_mixtab1,
-          local_mixtab2,
-          local_mixtab3);
+    uint hash_bytes_28_to_32 = metis((local uint *)hash,
+							  local_mixtab0,
+							  local_mixtab1,
+							  local_mixtab2,
+							  local_mixtab3);
 
     // for debug
 #ifdef VALIDATE_ALGORITHMS
@@ -79,7 +79,7 @@ single_noinit(constant ulong* restrict wide,
     }
 #endif
 
-    if( *(local uint*)((local uchar*)hash + 28) <= *target )
+    if( hash_bytes_28_to_32 <= *target )
     {
         out[atomic_inc(outcount)] = nonce;
     }
