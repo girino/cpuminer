@@ -198,7 +198,7 @@ metis_step(global   ulong* restrict in,
         hash[i] = in[(id * 8)+i];
     }
 
-    metis((uint *)hash,
+    uint hash_bytes_28_to_32 = metis((uint *)hash,
           local_mixtab0,
           local_mixtab1,
           local_mixtab2,
@@ -211,7 +211,7 @@ metis_step(global   ulong* restrict in,
     }
 #endif
 
-    if( *(uint*)((uchar*)hash + 28) <= *target )
+    if( uint hash_bytes_28_to_32 <= *target )
     {
         out[atomic_inc(outcount)] = nonce;
     }
