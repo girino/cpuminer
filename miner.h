@@ -260,6 +260,10 @@ enum sha256_algos {
 	ALGO_METIS_GPU_1,			/* metis */
 	ALGO_METIS_GPU_2,			/* metis */
 	ALGO_METIS_GPU_3,			/* metis */
+	ALGO_METIS_GPU_1_AMD,			/* metis */
+	ALGO_METIS_GPU_2_AMD,			/* metis */
+	ALGO_METIS_GPU_3_AMD,			/* metis */
+	ALGO_METIS_GPU_AUTO,			/* metis */
 #endif
 };
 

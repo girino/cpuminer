@@ -20,6 +20,9 @@ int scanhash_metis_opencl(int device, enum sha256_algos algo, int thr_id, uint32
 	const uint32_t *ptarget,
 	uint32_t max_nonce, unsigned long *hashes_done);
 
+// selects the best GPU algorithm
+enum sha256_algos benchmark(int device);
+
 #ifdef __cplusplus
 }
 #endif

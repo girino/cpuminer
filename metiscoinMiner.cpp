@@ -38,8 +38,27 @@ MetiscoinOpenCL::MetiscoinOpenCL(int _device_num, uint32_t _step_size) {
 	target = device->getContext()->createBuffer(sizeof(cl_uint), CL_MEM_READ_ONLY, NULL);
 }
 
+MetiscoinOpenCL::~MetiscoinOpenCL() {
+	printf("begin destructor\n");
 
-MetiscoinOpenCLConstant::MetiscoinOpenCLConstant(int _device_num, uint32_t _step_size) : MetiscoinOpenCL(_device_num, _step_size) {
+	delete u;
+	delete buff;
+	delete hashes;
+	delete out;
+	delete out_count;
+	delete begin_nonce;
+	delete target;
+	delete q;
+
+	// context
+	OpenCLMain &main = OpenCLMain::getInstance();
+	OpenCLDevice* device = main.getDevice(device_num);
+	device->getContext()->clearAllPrograms();
+
+	printf("end destructor\n");
+}
+
+MetiscoinOpenCLConstant::MetiscoinOpenCLConstant(int _device_num, uint32_t _step_size, bool use_AMD) : MetiscoinOpenCL(_device_num, _step_size) {
 
 	printf ("Initing algo with constant memspace...\n");
 
@@ -48,8 +67,10 @@ MetiscoinOpenCLConstant::MetiscoinOpenCLConstant(int _device_num, uint32_t _step
 	std::vector<std::string> files_keccak;
 	files_keccak.push_back("opencl/common.cl");
 	files_keccak.push_back("opencl/keccak.cl");
-	files_keccak.push_back("opencl/shavite_NVidia.cl"); // way faster on NVidia, not much slower on AMD
-	//files_keccak.push_back("opencl/shavite_AMD.cl");
+	if (use_AMD)
+		files_keccak.push_back("opencl/shavite_AMD.cl");
+	else
+		files_keccak.push_back("opencl/shavite_NVidia.cl"); // way faster on NVidia, not much slower on AMD
 	files_keccak.push_back("opencl/metis.cl");
 	files_keccak.push_back("opencl/tables.cl");
 	files_keccak.push_back("opencl/miner_constant.cl");
@@ -144,7 +165,7 @@ int MetiscoinOpenCLConstant::metiscoin_process(int thr_id, uint32_t *pdata,
 	return 0;
 }
 
-MetiscoinOpenCLGlobal::MetiscoinOpenCLGlobal(int _device_num, uint32_t _step_size) : MetiscoinOpenCL(_device_num, _step_size) {
+MetiscoinOpenCLGlobal::MetiscoinOpenCLGlobal(int _device_num, uint32_t _step_size, bool use_AMD) : MetiscoinOpenCL(_device_num, _step_size) {
 
 	printf ("Initing algo with global memspace...\n");
 
@@ -153,8 +174,10 @@ MetiscoinOpenCLGlobal::MetiscoinOpenCLGlobal(int _device_num, uint32_t _step_siz
 	std::vector<std::string> files_keccak;
 	files_keccak.push_back("opencl/common.cl");
 	files_keccak.push_back("opencl/keccak.cl");
-	files_keccak.push_back("opencl/shavite_NVidia.cl"); // way faster on NVidia, not much slower on AMD
-	//files_keccak.push_back("opencl/shavite_AMD.cl");
+	if (use_AMD)
+		files_keccak.push_back("opencl/shavite_AMD.cl");
+	else
+		files_keccak.push_back("opencl/shavite_NVidia.cl"); // way faster on NVidia, not much slower on AMD
 	files_keccak.push_back("opencl/metis.cl");
 	files_keccak.push_back("opencl/miner_global.cl");
 #ifdef VALIDATE_ALGORITHMS
@@ -261,7 +284,7 @@ int MetiscoinOpenCLGlobal::metiscoin_process(int thr_id, uint32_t *pdata,
 
 
 
-MetiscoinOpenCLSingle::MetiscoinOpenCLSingle(int _device_num, uint32_t _step_size) : MetiscoinOpenCL(_device_num, _step_size) {
+MetiscoinOpenCLSingle::MetiscoinOpenCLSingle(int _device_num, uint32_t _step_size, bool use_AMD) : MetiscoinOpenCL(_device_num, _step_size) {
 
 	printf ("Initing algo with global memspace and single kernel using local memory...\n");
 
@@ -270,8 +293,10 @@ MetiscoinOpenCLSingle::MetiscoinOpenCLSingle(int _device_num, uint32_t _step_siz
 	std::vector<std::string> files_keccak;
 	files_keccak.push_back("opencl/common.cl");
 	files_keccak.push_back("opencl/keccak.cl");
-	files_keccak.push_back("opencl/shavite_NVidia.cl"); // way faster on NVidia, not much slower on AMD
-	//files_keccak.push_back("opencl/shavite_AMD.cl");
+	if (use_AMD)
+		files_keccak.push_back("opencl/shavite_AMD.cl");
+	else
+		files_keccak.push_back("opencl/shavite_NVidia.cl"); // way faster on NVidia, not much slower on AMD
 	files_keccak.push_back("opencl/metis.cl");
 	files_keccak.push_back("opencl/miner_single.cl");
 #ifdef VALIDATE_ALGORITHMS
@@ -506,9 +531,12 @@ MetiscoinOpenCL* processors[255];
 int is_processors_inited = 0;
 void init_opencl_miner(int device, enum sha256_algos algo, int thr_id) {
 	switch(algo) {
-	case ALGO_METIS_GPU_1: processors[thr_id] = new MetiscoinOpenCLConstant(device, opt_step_size); break;
-	case ALGO_METIS_GPU_2: processors[thr_id] = new MetiscoinOpenCLGlobal(device, opt_step_size); break;
-	case ALGO_METIS_GPU_3: processors[thr_id] = new MetiscoinOpenCLSingle(device, opt_step_size); break;
+	case ALGO_METIS_GPU_1: processors[thr_id] = new MetiscoinOpenCLConstant(device, opt_step_size, false); break;
+	case ALGO_METIS_GPU_2: processors[thr_id] = new MetiscoinOpenCLGlobal(device, opt_step_size, false); break;
+	case ALGO_METIS_GPU_3: processors[thr_id] = new MetiscoinOpenCLSingle(device, opt_step_size, false); break;
+	case ALGO_METIS_GPU_1_AMD: processors[thr_id] = new MetiscoinOpenCLConstant(device, opt_step_size, true); break;
+	case ALGO_METIS_GPU_2_AMD: processors[thr_id] = new MetiscoinOpenCLGlobal(device, opt_step_size, true); break;
+	case ALGO_METIS_GPU_3_AMD: processors[thr_id] = new MetiscoinOpenCLSingle(device, opt_step_size, true); break;
 
 	}
 }
@@ -529,4 +557,101 @@ int scanhash_metis_opencl(int device, enum sha256_algos algo, int thr_id, uint32
 	return processors[thr_id]->metiscoin_process(thr_id, pdata,	ptarget, max_nonce, hashes_done);
 
 }
+
+MetiscoinOpenCL* processor;
+uint32_t *pdata;
+uint32_t *ptarget;
+
+void init_benchmark(int device, sha256_algos algo) {
+	switch(algo) {
+	case ALGO_METIS_GPU_1: processor = new MetiscoinOpenCLConstant(device, opt_step_size, false); break;
+	case ALGO_METIS_GPU_2: processor = new MetiscoinOpenCLGlobal(device, opt_step_size, false); break;
+	case ALGO_METIS_GPU_3: processor = new MetiscoinOpenCLSingle(device, opt_step_size, false); break;
+	case ALGO_METIS_GPU_1_AMD: processor = new MetiscoinOpenCLConstant(device, opt_step_size, true); break;
+	case ALGO_METIS_GPU_2_AMD: processor = new MetiscoinOpenCLGlobal(device, opt_step_size, true); break;
+	case ALGO_METIS_GPU_3_AMD: processor = new MetiscoinOpenCLSingle(device, opt_step_size, true); break;
+	}
+
+}
+
+double single_step_time() {
+	struct timeval tv_start, tv_end, diff;
+	unsigned long hashes_done;
+	// needs to reset data every time;
+	memset(pdata, 0, 80);
+
+	gettimeofday(&tv_start, NULL);
+	processor->metiscoin_process(-1, pdata,	ptarget, opt_step_size, &hashes_done);
+	gettimeofday(&tv_end, NULL);
+	timeval_subtract(&diff, &tv_end, &tv_start);
+
+	double time = diff.tv_sec + 1e-6 * diff.tv_usec;
+	//printf("algo: %d, elapsed: %f\n", algo, ret);
+	return time;
+}
+
+
+double inner_benchmark(int num_steps) {
+	struct timeval tv_start, tv_end, diff;
+	unsigned long hashes_done;
+	// needs to reset data every time;
+	memset(pdata, 0, 80);
+
+	gettimeofday(&tv_start, NULL);
+	processor->metiscoin_process(-1, pdata,	ptarget, opt_step_size * num_steps, &hashes_done);
+	gettimeofday(&tv_end, NULL);
+	timeval_subtract(&diff, &tv_end, &tv_start);
+
+	double time = diff.tv_sec + 1e-6 * diff.tv_usec;
+	double hashes_per_sec = hashes_done/time;
+	printf("elapsed: %f\n", time);
+	return hashes_per_sec;
+}
+
+void close_benchmark() {
+	delete processor;
+}
+
+#define TEST_DURATION 20.0
+
+sha256_algos benchmark(int device) {
+	sha256_algos all_algos[] = {ALGO_METIS_GPU_1, ALGO_METIS_GPU_1_AMD, ALGO_METIS_GPU_2, ALGO_METIS_GPU_2_AMD, ALGO_METIS_GPU_3, ALGO_METIS_GPU_3_AMD};
+	double hash_rates[6];
+	double hash_rate;
+	int num_algos = 6;
+
+	// global inits
+	pdata = new uint32_t[20];
+	ptarget = new uint32_t[16];
+	memset(pdata, 0, 80);
+	memset(ptarget, 0, 64);
+
+	for (int i = 0; i < num_algos; i++) {
+		printf("initing algo %d\n", all_algos[i]);
+		init_benchmark(device, all_algos[i]);
+
+		printf("benchmarking algo %d\n", all_algos[i]);
+		double test_time = single_step_time();
+		printf("algo %d single step ran in %f secs\n", all_algos[i], test_time);
+		int num_steps = (int)(0.5 + (TEST_DURATION/test_time));
+		if (num_steps < 1) num_steps = 1;
+		printf("running %d steps to target %f secs\n", num_steps, TEST_DURATION);
+		hash_rates[i] = inner_benchmark(num_steps);
+		printf("test hash rate: %f hashes/sec\n", hash_rates[i]);
+
+		close_benchmark();
+	}
+	int max = 0;
+	for (int i = 0; i < num_algos; i++) {
+		if (hash_rates[max] < hash_rates[i]) max = i;
+	}
+
+	//deletes
+	delete pdata;
+	delete ptarget;
+
+	printf("returning: %d\n", all_algos[max]);
+	return all_algos[max];
+}
+
 }

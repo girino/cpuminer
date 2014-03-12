@@ -129,6 +129,8 @@ public:
 	OpenCLBuffer * createBuffer(size_t size, cl_mem_flags flags=CL_MEM_READ_WRITE, void* original=NULL);
 
 	OpenCLProgram* getProgram(int pos);
+
+	void clearAllPrograms();
 private:
 	cl_context context;
 	std::vector<OpenCLProgram*> programs;

@@ -8,7 +8,7 @@ int log2(size_t value);
 class MetiscoinOpenCL {
 public:
 	MetiscoinOpenCL(int _device_num, uint32_t _step_size);
-	virtual ~MetiscoinOpenCL() { };
+	virtual ~MetiscoinOpenCL();
 	virtual int metiscoin_process(int thr_id, uint32_t *pdata,
 			const uint32_t *ptarget,
 			uint32_t max_nonce, unsigned long *hashes_done) = 0;
@@ -17,6 +17,7 @@ protected:
 	uint32_t STEP_SIZE;
 	uint32_t NUM_STEPS;
 
+	OpenCLProgram* program;
 	OpenCLBuffer* u;
 	OpenCLBuffer* buff;
 	OpenCLBuffer* hashes;
@@ -37,7 +38,7 @@ protected:
 class MetiscoinOpenCLConstant : public MetiscoinOpenCL {
 public:
 
-	MetiscoinOpenCLConstant(int device_num, uint32_t _step_size);
+	MetiscoinOpenCLConstant(int device_num, uint32_t _step_size, bool use_AMD);
 	int metiscoin_process(int thr_id, uint32_t *pdata,
 			const uint32_t *ptarget,
 			uint32_t max_nonce, unsigned long *hashes_done);
@@ -51,7 +52,7 @@ private:
 class MetiscoinOpenCLGlobal : public MetiscoinOpenCL {
 public:
 
-	MetiscoinOpenCLGlobal(int _device_num, uint32_t _step_size);
+	MetiscoinOpenCLGlobal(int _device_num, uint32_t _step_size, bool use_AMD);
 	int metiscoin_process(int thr_id, uint32_t *pdata,
 			const uint32_t *ptarget,
 			uint32_t max_nonce, unsigned long *hashes_done);
@@ -69,7 +70,7 @@ private:
 class MetiscoinOpenCLSingle : public MetiscoinOpenCL {
 public:
 
-	MetiscoinOpenCLSingle(int _device_num, uint32_t _step_size);
+	MetiscoinOpenCLSingle(int _device_num, uint32_t _step_size, bool use_AMD);
 	int metiscoin_process(int thr_id, uint32_t *pdata,
 			const uint32_t *ptarget,
 			uint32_t max_nonce, unsigned long *hashes_done);

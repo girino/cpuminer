@@ -268,6 +268,13 @@ OpenCLContext::~OpenCLContext() {
 	clReleaseContext(context);
 }
 
+void OpenCLContext::clearAllPrograms() {
+	for (int i = 0; i < programs.size(); i++) {
+		delete programs[i];
+	}
+	programs.clear();
+}
+
 OpenCLProgram::OpenCLProgram(cl_program _program, OpenCLContext* _parent) {
 	program = _program;
 	parent = _parent;

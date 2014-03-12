@@ -109,6 +109,10 @@ static const char *algo_names[] = {
 	[ALGO_METIS_GPU_1]		= "metis1",
 	[ALGO_METIS_GPU_2]		= "metis2",
 	[ALGO_METIS_GPU_3]		= "metis3",
+	[ALGO_METIS_GPU_1_AMD]		= "metis1a",
+	[ALGO_METIS_GPU_2_AMD]		= "metis2a",
+	[ALGO_METIS_GPU_3_AMD]		= "metis3a",
+	[ALGO_METIS_GPU_AUTO]		= "auto",
 #endif
 };
 
@@ -130,7 +134,7 @@ static int opt_scantime = 5;
 static json_t *opt_config;
 static const bool opt_time = true;
 #ifndef NO_OPENCL
-static enum sha256_algos opt_algo = ALGO_METIS_GPU_3;
+static enum sha256_algos opt_algo = ALGO_METIS_GPU_AUTO;
 #else
 static enum sha256_algos opt_algo = ALGO_METIS_CPU;
 #endif
@@ -706,6 +710,7 @@ static void *miner_thread(void *userdata)
 	char s[16];
 	int i;
 
+
 	/* Set worker threads to nice 19 and then preferentially to SCHED_IDLE
 	 * and if that fails, then SCHED_BATCH. No need for this to be an
 	 * error if it fails */
@@ -810,6 +815,9 @@ static void *miner_thread(void *userdata)
 		case ALGO_METIS_GPU_1:
 		case ALGO_METIS_GPU_2:
 		case ALGO_METIS_GPU_3:
+		case ALGO_METIS_GPU_1_AMD:
+		case ALGO_METIS_GPU_2_AMD:
+		case ALGO_METIS_GPU_3_AMD:
 			rc = scanhash_metis_gpu(device_nums[thr_id], opt_algo,thr_id, work.data, work.target,
 			                      max_nonce, &hashes_done);
 			break;
@@ -1423,6 +1431,15 @@ int main(int argc, char *argv[])
 	if (numdevices > 0) {
 		opt_n_threads = numdevices;
 	}
+
+	// benchmarks
+	if (opt_algo == ALGO_METIS_GPU_AUTO && numdevices == 1) {
+		opt_algo = benchmark(device_nums[0]);
+	} else if (numdevices > 1) {
+		fprintf(stderr, "only one device supported in auto mode", argv[0]);
+		show_usage_and_exit(1);
+	}
+
 #endif
 
 #ifdef HAVE_SYSLOG_H
