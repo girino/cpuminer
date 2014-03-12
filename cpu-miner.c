@@ -1430,6 +1430,8 @@ int main(int argc, char *argv[])
 	// now, if used devices options, change numthreads to num devices:
 	if (numdevices > 0) {
 		opt_n_threads = numdevices;
+	} else {
+		numdevices = opt_n_threads;
 	}
 
 	// benchmarks
