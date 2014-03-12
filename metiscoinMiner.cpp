@@ -7,6 +7,7 @@
 #include "metiscoinminerC.h"
 #include "miner.h"
 #include <stdio.h>
+#include <string.h>
 
 int log2(size_t value) {
 	int ret = 0;
