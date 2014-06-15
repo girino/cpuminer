@@ -38,6 +38,9 @@
 #include "compat.h"
 #include "miner.h"
 
+// force CAN_CHANGE_URL
+#define CAN_CHANGE_URL
+
 #define PROGRAM_NAME		"minerd"
 // changed to 10 because the blocktime is so short 30 gives too much stale
 #define LP_SCANTIME		10
@@ -181,11 +184,15 @@ static char const usage[] = "\
 Usage: " PROGRAM_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the algorithm to use\n\
-                          scrypt    scrypt(1024, 1, 1) (default)\n\
+                          scrypt    scrypt(1024, 1, 1)\n\
                           sha256d   SHA-256d\n\
                           metis1    metiscoin (algo 1)\n\
-                          metis2    metiscoin (algo 1)\n\
-                          metis3    metiscoin (algo 3 - default)\n"
+                          metis2    metiscoin (algo 2)\n\
+                          metis3    metiscoin (algo 3)\n\
+                          metis1a   metiscoin (algo 1 AMD)\n\
+                          metis2a   metiscoin (algo 2 AMD)\n\
+                          metis3a   metiscoin (algo 3 AMD)\n\
+                          auto      metiscoin (default - benchmark and autodetect best algo)\n"
 #ifndef NO_OPENCL
 "  -d, --device=N        single OpenCL device number (see --list-devices)\n\
   -d, --device=N,N,N    list of OpenCL device numbers (see --list-devices)\n\
